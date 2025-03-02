@@ -19,35 +19,30 @@ const handleError = (err, res) => {
 };
 
 app.get("/", async (req, res) => {
-    console.log("Root API was accessed");
     await User.findAll({})
         .then((users) => res.json({ users }))
         .catch((err) => res.json({ err }));
 });
 
 app.get("/users", async (req, res) => {
-    console.log("Users API was accessed");
     await User.findAll({})
         .then((users) => res.json({ users }))
         .catch((err) => res.json({ err }));
 });
 
 app.get("/recipes", async (req, res) => {
-    console.log("Recipes API was accessed");
     await Recipe.findAll({})
         .then((recipes) => res.json({ recipes }))
         .catch((err) => res.json({ err }));
 });
 
 app.get("/comments", async (req, res) => {
-    console.log("Comments API was accessed");
     await Comment.findAll({})
         .then((comments) => res.json({ comments }))
         .catch((err) => res.json({ err }));
 });
 
 app.get("/users/user", async (req, res) => {
-    console.log("User API was accessed");
     const { id } = req.query;
     await User.findOne({ where: { id: Number(id) } })
         .then((user) => {
@@ -58,7 +53,6 @@ app.get("/users/user", async (req, res) => {
 });
 
 app.get("/recipes/recipe", async (req, res) => {
-    console.log("Recipe API was accessed");
     const { id } = req.query;
     await Recipe.findOne({ where: { id: Number(id) } })
         .then((recipe) => {
@@ -69,7 +63,6 @@ app.get("/recipes/recipe", async (req, res) => {
 });
 
 app.get("/comments/comment", async (req, res) => {
-    console.log("Comment API was accessed");
     const { recipeId } = req.query;
     await Comment.findAll({ where: { recipeId: Number(recipeId) } })
         .then((comments) => {
@@ -80,7 +73,6 @@ app.get("/comments/comment", async (req, res) => {
 });
 
 app.get("/users/user/usrcmmts", async (req, res) => {
-    console.log("User Comments API was accessed");
     const { userId } = req.query;
     await Comment.findAll({ where: { userId: Number(userId) } })
         .then((comments) => {
@@ -168,6 +160,31 @@ app.post("/comment", async (req, res) => {
     await Comment.create({ text, recipeId, userId })
         .then((createdComment) => res.status(200).json({ message: "Comment saved successfully" }))
         .catch((error) => res.status(500).json({ error }));
+});
+
+// Rating APIs
+app.get("/ratings", async (req, res) => {
+    await Rating.findAll({})
+        .then((ratings) => res.json({ ratings }))
+        .catch((err) => res.json({ err }));
+});
+
+app.post("/ratings", async (req, res) => {
+    const { recipeId, userId, rating } = req.body;
+    await Rating.create({ recipeId, userId, rating })
+        .then((createdRating) => res.status(200).json({ message: "Rating saved successfully" }))
+        .catch((error) => res.status(500).json({ error }));
+});
+
+app.put("/ratings/:id", async (req, res) => {
+    const { id } = req.params;
+    const { rating } = req.body;
+    await Rating.update({ rating }, { where: { id: Number(id) } })
+        .then((result) => {
+            if (result[0]) return res.json({ message: "Rating updated successfully" });
+            else return res.json({ message: "Rating not found" });
+        })
+        .catch((err) => res.json({ err }));
 });
 
 sequelize.sync().then(async () => {
