@@ -92,6 +92,16 @@ app.put("/users/user/usernme", async (req, res) => {
         .catch((err) => res.json({ err }));
 });
 
+app.get('/login', (req, res) => {
+  const { username, password } = req.body;
+  res.send('Login endpoint');
+});
+
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+  res.send('Registration endpoint');
+});
+
 app.put("/users/user/userpwd", async (req, res) => {
     const { username, password } = req.body;
     await User.update({ password }, { where: { username } })
