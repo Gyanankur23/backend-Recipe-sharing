@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: recipe-sharing-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-recipe_sharing}
+      MYSQL_USER: ${DB_USER:-recipe_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-recipe_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - recipe-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build: .
+    container_name: recipe-sharing-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-recipe_sharing}
+      DB_USER: ${DB_USER:-recipe_user}
+      DB_PASSWORD: ${DB_PASSWORD:-recipe_password}
+      JWT_SECRET: ${JWT_SECRET:-your_super_secret_jwt_key}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - recipe-network
+
+volumes:
+  mysql_data:
+
+networks:
+  recipe-network:
+    driver: bridge

@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../../config/db');
-const Recipe = require('./Recipe.model');
-const User = require('./User.model');
+const { sequelize } = require('../config/database');
 
 const Comment = sequelize.define('Comment', {
     id: {
@@ -10,14 +8,17 @@ const Comment = sequelize.define('Comment', {
         primaryKey: true,
     },
     text: {
-        type: DataTypes.TEXT, 
+        type: DataTypes.TEXT,
         allowNull: false,
+        validate: {
+            len: [1, 2000]
+        }
     },
     recipeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: Recipe,
+            model: 'recipes',
             key: 'id',
         },
     },
@@ -25,10 +26,13 @@ const Comment = sequelize.define('Comment', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: User,
+            model: 'users',
             key: 'id',
         },
     },
+}, {
+    timestamps: true,
+    tableName: 'comments'
 });
 
 module.exports = Comment;
